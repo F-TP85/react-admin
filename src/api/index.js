@@ -8,7 +8,6 @@ export const reqGetWeb = (adcode,extensions='base') => {//获取天气信息接�
     return new Promise((resolve,resject)=>{
         let url = `https://restapi.amap.com/v3/weather/weatherInfo?key=fe640901c2c6fb4a4c24d3c948e904e0&city=${adcode}&extensions=${extensions}`
         jsonp(url,{},(err,data)=>{
-            console.log('@@',err,data)
             if(!err && data) {
                 resolve(data)
             } else {
