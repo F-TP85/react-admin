@@ -1,13 +1,11 @@
 import React, { Component } from "react";
-import "./index.less";
 import { Header } from "antd/lib/layout/layout";
-import p1 from "../../assets/img/logo.png";
 import { Form, Input, Button, Checkbox, Spin, Space, message } from "antd";
+
+import "./index.less";
+import p1 from "../../assets/img/logo.png";
 import { reqLogin } from '../../api/index'
-import {
-  setUser, 
-  // getUser 
-} from '../../utils/storageUtils'
+import {setUser} from '../../utils/storageUtils'
 
 export default class Login extends Component {
   //ref注册表单 用于重置表单

@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import { Menu } from "antd";
-import p1_img from '../../assets/img/logo.png'
-import 'antd/dist/antd.css';
+import PubSub from 'pubsub-js' //引入订阅
 import {Link} from 'react-router-dom'
+
+import p1_img from '../../assets/img/logo.png'
 import meun from '../../config/meun'
 
 const { SubMenu,Item } = Menu;
@@ -35,7 +36,7 @@ export default class LeftNav extends Component {
     return arr.reduce((pre,item)=>{
       if(!item.children) {
         pre.push((
-          <Item key={item.id} icon={item.icon}>
+          <Item key={item.id} icon={item.icon} onClick={this.clickLink.bind(this,item.text)}>
             <Link to={item.path}>
               {item.text}
             </Link>
@@ -43,7 +44,7 @@ export default class LeftNav extends Component {
         ))
       } else {
         pre.push((
-          <SubMenu key={item.id} title={item.text}>
+          <SubMenu key={item.id} icon={item.icon} title={item.text}>
               {this.getMeun2(item.children)}
           </SubMenu>
         ))
@@ -53,9 +54,14 @@ export default class LeftNav extends Component {
     },[])
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     //这样写的只调用一次
     this.willRender = this.getMeun2(meun);
+  }
+
+
+  clickLink = (text) => {
+    PubSub.publish('title', text) //发布消息
   }
 
   render() {
@@ -75,36 +81,7 @@ export default class LeftNav extends Component {
           >
 
             {
-               this.willRender
-                // navData.map(((item)=>{
-                    
-                //     if(!item.children.length) {
-
-                //         return (
-                //             <Menu.Item key={item.id} icon={item.icon}>
-                //               <Link to={item.path}>
-                //                 {item.text}
-                //               </Link>
-                //             </Menu.Item>
-                //         )
-                //     } else {
-                //         return (
-                //             <SubMenu key={item.id} title={item.text} icon={item.icon}>
-                //                 {
-                //                     item.children.map((d)=>{
-                //                         return (
-                //                             <Menu.Item key={d.id} icon={d.icon}>
-                //                               <Link to={d.path}>
-                //                                 {d.text}
-                //                               </Link>
-                //                             </Menu.Item>
-                //                         )
-                //                     })
-                //                 }
-                //             </SubMenu>
-                //         )
-                //     }
-                // }))
+               this.willRender 
             }
 
           </Menu>

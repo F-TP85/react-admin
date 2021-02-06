@@ -16,3 +16,9 @@ export const reqGetWeb = (adcode,extensions='base') => {//获取天气信息接�
         })
     })
 }
+
+export const repGetCategory = (params={}) => axios('/api/manage/category/list',params) //请求商品分类接口
+
+export const reqAddCategory = (params={}) => axios('/api/manage/category/add',params,'post') //添加商品分类接口
+
+export const reqUpdateCategory = (params={}) => axios('/api/manage/category/update',params,'post') //更新商品分类接口

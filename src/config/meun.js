@@ -11,7 +11,7 @@ import {
   
   } from "@ant-design/icons";
 
-export default [
+const arr = [
   {
       id: '1',
       text: '首页',
@@ -70,3 +70,5 @@ export default [
     ],
   }
 ]
+
+export default arr
