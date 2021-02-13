@@ -32,7 +32,7 @@ const arr = [
             id: '3-2',
             text: '商品管理',
             icon: <PieChartOutlined/>,
-            path: '/admin/product'
+            path: '/admin/product/productHome'
         }
     ]
   },{

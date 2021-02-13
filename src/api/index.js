@@ -22,3 +22,5 @@ export const repGetCategory = (params={}) => axios('/api/manage/category/list',p
 export const reqAddCategory = (params={}) => axios('/api/manage/category/add',params,'post') //添加商品分类接口
 
 export const reqUpdateCategory = (params={}) => axios('/api/manage/category/update',params,'post') //更新商品分类接口
+
+export const reqProduct = (params={}) => axios('/api/manage/product/list',params) //请求商品分类列表

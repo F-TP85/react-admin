@@ -53,7 +53,6 @@ export default class Admin extends Component {
                                 <Route path='/admin/pie' component={Pie}/>
                                 <Redirect to='/admin/home' />
                             </Suspense>
-                           
                         </Switch>
                     </Content>
                     <Footer>推荐使用谷歌浏览器,可以获得页面更佳体验</Footer>

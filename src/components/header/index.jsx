@@ -43,7 +43,8 @@ class Header extends Component {
     }
 
     componentWillUnmount() {
-        clearInterval(this.timeID)
+        clearInterval(this.timeID);
+        PubSub.unsubscribe('title')
     }
 
     //确认退出登录?
