@@ -1,61 +1,65 @@
 import React, { Component } from "react";
-import { Card, Select, Input, Button, Table } from "antd";
+import { Card, Select, Input, Button, Table, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
 import LinkButton from '../../components/link-button'
-import {reqProduct} from '../../api/index'
+import {reqProduct, reqSearch, reqUpdateStatus} from '../../api/index'
 
 const Option = Select.Option;
 
 export default class ProductHome extends Component {
     state = {
-        products: [
-            {
-                status: 1,
-                imgs: ["image-1559402396338.jpg"],
-                _id: "5ca9e05db49ef916541160cd",
-                name: "联想ThinkPad 翼4809",
-                desc: "年度重量级新品，X390、T490全新登场 更加轻薄机身设计9",
-                price: 65999,
-                pCategoryId: "5ca9d6c0b49ef916541160bb",
-                categoryId: "5ca9db9fb49ef916541160cc",
-                detail:
-                    '<p><span style="color: rgb(228,57,60);background-color: rgb(255,255,255);font-size: 12px;">想你所需，超你所想！精致外观，轻薄便携带光驱，内置正版office杜绝盗版死机，全国联保两年！</span> 222</p>\n<p><span style="color: rgb(102,102,102);background-color: rgb(255,255,255);font-size: 16px;">联想（Lenovo）扬天V110 15.6英寸家用轻薄便携商务办公手提笔记本电脑 定制【E2-9010/4G/128G固态】 2G独显 内置</span></p>\n<p><span style="color: rgb(102,102,102);background-color: rgb(255,255,255);font-size: 16px;">99999</span></p>\n',
-                __v: 0,
-            },
-            {
-                status: 1,
-                imgs: ["image-1559402448049.jpg", "image-1559402450480.jpg"],
-                _id: "5ca9e414b49ef916541160ce",
-                name: "华硕(ASUS) 飞行堡垒",
-                desc:
-                    "15.6英寸窄边框游戏笔记本电脑(i7-8750H 8G 256GSSD+1T GTX1050Ti 4G IPS)",
-                price: 6799,
-                pCategoryId: "5ca9d6c0b49ef916541160bb",
-                categoryId: "5ca9db8ab49ef916541160cb",
-                detail:
-                    '<p><span style="color: rgb(102,102,102);background-color: rgb(255,255,255);font-size: 16px;">华硕(ASUS) 飞行堡垒6 15.6英寸窄边框游戏笔记本电脑(i7-8750H 8G 256GSSD+1T GTX1050Ti 4G IPS)火陨红黑</span>&nbsp;</p>\n<p><span style="color: rgb(228,57,60);background-color: rgb(255,255,255);font-size: 12px;">【4.6-4.7号华硕集体放价，大牌够品质！】1T+256G高速存储组合！超窄边框视野无阻，强劲散热一键启动！</span>&nbsp;</p>\n',
-                __v: 0,
-            },
-        ], //商品的数组
+        products: [], //商品的数组
+        total: 0, //商品数据总条数
+        loading: false, //是否正在加载中
+        inputContent: '', //搜索输入框文本
+        searchType: 'productName',
     };
 
-    pageNum = 1;
-    pageSize = 5;
+    pageNum = 0; //当前页码
+    pageSize = 0; //当前页显示条数
+    flag = true; //显示默认的商品列表还是所搜的商品列表
 
+    //程序初始化
     UNSAFE_componentWillMount() {
         this.init();
         this.getProduct();
     }
 
-    getProduct = async () => {
-        const {pageNum, pageSize} = this
-        const res = await reqProduct({pageNum, pageSize})
+    //请求商品数据列表
+    getProduct = async (pageNum = 1, pageSize = 5) => {
+        this.setState({loading: true})
+        this.pageNum = pageNum;
+        this.pageSize = pageSize;
+        const res = await reqProduct({pageNum, pageSize});
+        this.markaState(res,'商品列表数据请求失败!')
+        this.setState({loading: false})
+    }
+
+    //请求数据时 抽离相同部分的逻辑
+    markaState = (res,str) => {
         if(res&&res.status === 200) {
-            const {data} = res.data
-            console.log(data)
+            const {data} = res.data;
+            this.setState({products:data.list, total: data.total});
+        } else {
+            message.error(str);
         }
-        
+    }
+
+    //更新商品状态
+    updataProduct = async (status,state) => {
+        let obj = {};
+        obj.status  = status === 1 ? 2 : 1;
+        obj.productId = state._id;
+        let msg = status === 1 ? '下架':'上架' ;
+
+        let res = await reqUpdateStatus(obj);
+        if(res&&res.status === 200 && res.data.status !== status) {
+            message.success(state.name + ' ' + msg +'成功!')
+        } else {
+            message.error(state.name +' ' + msg +'失败!')
+        }
+        this.getProduct(this.pageNum,this.pageSize);
     }
 
     //初始化
@@ -78,11 +82,11 @@ export default class ProductHome extends Component {
             {
                 title: "状态",
                 dataIndex: "status",
-                render: (status) => {
+                render: (status,state) => {
                     return (
                         <span>
-                            <Button type="primary" style={{marginRight: 15}}>下架</Button>
-                            <span>在售</span>
+                            <Button type="primary" style={{marginRight: 15}} onClick={this.updataProduct.bind(this,status,state)}>{ status === 1 ? '下架':'上架'}</Button>
+                            <span>{ status === 1 ? '在售' : '已下架'}</span>
                         </span>
                     )
                 }
@@ -91,11 +95,12 @@ export default class ProductHome extends Component {
 
                 title: "操作",
                 dataIndex: "detail",
-                render: (status) => {
+                //  第二个形参带有完整的整行数据
+                render: (_,state) => {
                     return (
                         <span>
-                            <LinkButton style={{marginRight: 15}}>详情</LinkButton>
-                            <LinkButton>修改</LinkButton>
+                            <LinkButton style={{marginRight: 15}} onClick={this.details.bind(this,state)}>详情</LinkButton>
+                            <LinkButton onClick={this.changeProduct.bind(this,state)}>修改</LinkButton>
                         </span>
                     )
                 }
@@ -103,48 +108,106 @@ export default class ProductHome extends Component {
         ];
     };
 
-    render() {
-        const { products } = this.state;
-        const { columns } = this;
+    //详情: 跳转到详情页
+    details = (state) => {
+        this.props.history.push({pathname: '/admin/product/productDeatil',state})
+    }
 
-        // Card 属性
+    //修改: 跳转到修改页
+    changeProduct = (state) =>{
+        this.props.history.push({pathname: '/admin/product/productAddUpdata',state})
+    }
+
+    //底部分页器分页时
+    paginationChange = (pageNum, pageSize) => {
+        this.pageNum = pageNum;
+        this.pageSize = pageSize;
+        if(this.flag) {
+            this.getProduct(pageNum, pageSize)
+        } else {
+            this.searchProduct(1,pageNum, pageSize)
+        }
+    }
+
+    //搜索按钮:点击事件
+    searchProduct = (even,pageNum=1, pageSize=5) => {
+        this.flag = false;
+        let {inputContent, searchType} = this.state
+        if(inputContent) {
+            let params = {
+                pageNum,
+                pageSize,
+                [searchType]: inputContent,
+            } 
+            this.getSearch(params)
+        } else {
+            message.error('搜索值不能为空!')
+        }
+        
+    }
+    //重置按钮
+    resetState = () => {
+        this.setState({inputContent: '', searchType: 'productName'});
+        this.flag = true;
+        this.getProduct();
+    }
+
+    //搜索请求方法
+    getSearch = async (params) => {
+        this.setState({loading: true})
+        let res = await reqSearch(params);
+        this.markaState(res,'获取数据失败!')
+        this.setState({loading: false})
+    }
+
+    //input change事件 获取输入框文本
+    InputChange = (e) => {
+        this.setState({inputContent: e.target.value});
+    }
+
+    //下拉框change事件
+    SelectChange = (val) => {
+        this.setState({searchType: val});
+    }
+
+    render() {
+        const { products, total, loading, inputContent, searchType } = this.state;
+        const { columns, pageNum, pageSize, SelectChange, searchProduct, InputChange, resetState } = this;
+
+        // Card 属性 左上角区域render设置
         const title = (
             <span>
-                <Select value="1" style={{ width: "150px" }}>
-                    <Option value="1">按名称搜索</Option>
-                    <Option value="2">按描述搜索</Option>
+                <Select style={{ width: "150px" }} onChange={SelectChange} value={searchType}>
+                    <Option value="productName">按名称搜索</Option>
+                    <Option value="productDesc">按描述搜索</Option>
                 </Select>
-                <Input
-                    placeholder="请输入关键字"
-                    style={{ width: "200px", margin: 15 }}
-                />
-                <Button type="primary">搜索</Button>
+                <Input placeholder="请输入关键字" value={inputContent} style={{ width: "200px", margin: 15 }} onChange={InputChange}/>
+                <Button type="primary" onClick={searchProduct} style={{ margin: 15 }}>搜索</Button>
+                <Button type="primary" onClick={resetState}>重置</Button>
             </span>
         );
+
+        //右上角render区域设定
         const extra = (
-            <Button type="primary" icon={<PlusOutlined />}>
+            <Button type="primary" icon={<PlusOutlined />} onClick={()=>{this.props.history.push('/admin/product/productAddUpdata')}}>
                 添加商品
             </Button>
         );
 
-        const dataSource = [
-            {
-                key: "1",
-                name: "胡彦斌",
-                age: 32,
-                address: "西湖区湖底公园1号",
-            },
-            {
-                key: "2",
-                name: "胡彦祖",
-                age: 42,
-                address: "西湖区湖底公园1号",
-            },
-        ];
-
         return (
             <Card title={title} extra={extra}>
-                <Table dataSource={products} columns={columns} rowKey='_id' ></Table>
+                <Table dataSource={products} loading={loading}
+                columns={columns} rowKey='_id' 
+                pagination={{
+                    current: pageNum, 
+                    pageSize, 
+                    defaultCurrent: 5,
+                    showQuickJumper: true, 
+                    total,
+                    onChange: this.paginationChange
+                }} >
+
+                </Table>
             </Card>
         );
     }

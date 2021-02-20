@@ -13,10 +13,10 @@ import {
 
 const arr = [
   {
-      id: '1',
-      text: '首页',
-      icon: <HomeOutlined/>,
-      path: '/admin/home'
+    id: '1',
+    text: '首页',
+    icon: <HomeOutlined/>,
+    path: '/admin/home'
   },{
     id: '2',
     text: '商品',

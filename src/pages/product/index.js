@@ -2,6 +2,7 @@
 import React, { Component, lazy, Suspense } from 'react'
 import {Route, Switch, Redirect } from 'react-router-dom'
 import {Card} from 'antd'
+import './index.less'
 
 const ProductHome = lazy(()=> import('./ProductHome.jsx')) 
 const ProductAddUpdata = lazy(()=> import('./ProductAddUpdata.jsx')) 
